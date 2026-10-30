@@ -10,20 +10,29 @@ from pathlib import Path
 from common import connect, embed_docs
 
 
+# A line that starts a new section: a markdown heading ("## Costs") or a
+# numbered one ("3.2 Results").
+SECTION_START = re.compile(r"^(#{1,6} |\d+(\.\d+)+\s*\S)")
+
+
 def chunk(text, size=1200, overlap=1):
-    """Pack whole paragraphs into chunks of up to `size` characters.
+    """Pack whole paragraphs into chunks of up to `size` characters, never
+    letting a chunk run across a section boundary.
 
     Splitting on paragraphs (blank lines) keeps sentences intact, unlike a fixed
-    character window. The last `overlap` paragraph(s) of each chunk are repeated
-    at the start of the next, so an idea that spans a boundary is still whole
-    in at least one chunk.
+    character window. Starting fresh at each section keeps one topic per chunk,
+    so its vector isn't an average of two unrelated topics. Within a long
+    section, the last `overlap` paragraph(s) of each chunk are repeated at the
+    start of the next, so an idea that spans a boundary is still whole in at
+    least one chunk.
     """
     paras = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
     chunks, current = [], []
     for p in paras:
-        if current and len("\n\n".join(current + [p])) > size:
+        new_section = SECTION_START.match(p)
+        if current and (new_section or len("\n\n".join(current + [p])) > size):
             chunks.append("\n\n".join(current))
-            current = current[-overlap:] if overlap else []
+            current = [] if new_section or not overlap else current[-overlap:]
         current.append(p)
     if current:
         chunks.append("\n\n".join(current))
