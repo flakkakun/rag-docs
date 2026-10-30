@@ -1,0 +1,52 @@
+{"question": "Why can't a model predict the fifth word before the fourth?", "answer_contains": "autoregressive generation", "type": "paraphrase"}
+{"question": "How does the model figure out which earlier words matter?", "answer_contains": "a query, a key, and a value", "type": "paraphrase"}
+{"question": "What decides how many people one GPU can serve at the same time?", "answer_contains": ["the KV cache decides how many users you can serve at once", "main limit on how many users you can batch"], "type": "paraphrase"}
+{"question": "Why are the GPU's math units mostly idle when one person is chatting?", "answer_contains": ["generation is memory-bound", "the speed limit is memory bandwidth"], "type": "paraphrase"}
+{"question": "What's the restaurant analogy for serving model requests?", "answer_contains": "Cooking several dishes at once costs barely more than cooking one", "type": "paraphrase"}
+{"question": "What goes wrong when a short answer finishes early in a fixed group of requests?", "answer_contains": "its slot in the batch just sits empty", "type": "paraphrase"}
+{"question": "What idea did vLLM borrow from operating systems?", "answer_contains": ["virtual memory with paging", "like operating system memory pages"], "type": "paraphrase"}
+{"question": "How can a hundred users share one long system prompt without storing it a hundred times?", "answer_contains": "you only need to store that prompt's KV cache once", "type": "paraphrase"}
+{"question": "Why shouldn't I report mean latency?", "answer_contains": ["Averages hide the pain", "averages hide the slow requests"], "type": "paraphrase"}
+{"question": "The server dashboard looks fine but users say it's slow. Where's the problem?", "answer_contains": "The problem is in between", "type": "paraphrase"}
+{"question": "How do I make the model weights take less memory?", "answer_contains": ["Quantization stores them with fewer bits", "try quantization, which shrinks the weights"], "type": "paraphrase"}
+{"question": "How do you get several tokens for the price of one big-model step?", "answer_contains": "uses a small, fast draft model to guess", "type": "paraphrase"}
+{"question": "Why did the benchmark crash on the very first request?", "answer_contains": ["it replies with a redirect", "so it sent back a redirect"], "type": "paraphrase"}
+{"question": "Why did the GPU never shut down while the dashboard was running?", "answer_contains": "the server never sees three quiet minutes", "type": "paraphrase"}
+{"question": "What was the Orca paper about?", "answer_contains": "a research paper called Orca", "type": "exact"}
+{"question": "What is AWQ?", "answer_contains": "like one called AWQ", "type": "exact"}
+{"question": "What does RadixAttention do?", "answer_contains": ["called a radix tree", "RadixAttention, which keeps and reuses the KV cache"], "type": "exact"}
+{"question": "How much does an L4 cost per hour?", "answer_contains": "eighty cents an hour", "type": "exact"}
+{"question": "What max-model-len did we set?", "answer_contains": "maximum context length to four thousand ninety-six", "type": "exact"}
+{"question": "What's the cost per million tokens for an 80-cent-an-hour GPU at 400 tokens a second?", "answer_contains": "about fifty-five cents per million tokens", "type": "needle"}
+{"question": "How much KV cache memory does one token take on Qwen 2.5 7B?", "answer_contains": "fifty-six kilobytes", "type": "needle"}
+{"question": "Why does Qwen store only four sets of keys and values per layer?", "answer_contains": "grouped-query attention", "type": "needle"}
+{"question": "What's the difference between prefill and decode?", "answer_contains": ["prefill is compute-bound, decode is memory-bound", "Prefill processes the whole prompt at once"], "type": "needle"}
+{"question": "How do you stop a huge new prompt from freezing everyone else's stream?", "answer_contains": "a trick called chunked prefill", "type": "needle"}
+{"question": "What happened when the cloud had no L4s available?", "answer_contains": ["The cloud ran out of GPUs", "falls back to something similar, like an A10"], "type": "needle"}
+{"question": "Why use pieces of words instead of whole words?", "answer_contains": "With sub-word pieces, the model gets a fixed vocabulary", "type": "paraphrase"}
+{"question": "What is the model file, really?", "answer_contains": "a giant file of numbers called weights, or parameters", "type": "paraphrase"}
+{"question": "Is vLLM a kind of model?", "answer_contains": ["vLLM is not a model. It's an inference engine", "vLLM is the inference engine that loads those weights"], "type": "paraphrase"}
+{"question": "What happens when the KV cache fills up?", "answer_contains": "vLLM calls that preemption", "type": "paraphrase"}
+{"question": "What should you watch on the dashboard to tell you've run out of memory?", "answer_contains": "line is climbing, you've hit your memory limit", "type": "paraphrase"}
+{"question": "Why does a long prompt make the first word arrive later?", "answer_contains": ["A long prompt means a long prefill", "So TTFT goes up when prompts get longer"], "type": "paraphrase"}
+{"question": "How fast do people read?", "answer_contains": "around four or five words a second", "type": "paraphrase"}
+{"question": "Is ITL the same thing as time per output token?", "answer_contains": "people use TPOT and ITL almost interchangeably", "type": "paraphrase"}
+{"question": "Should I always rent the biggest GPU?", "answer_contains": "which gives me the lowest cost per million tokens while meeting my latency target", "type": "paraphrase"}
+{"question": "Why did the first build break on a library version?", "answer_contains": "pin your versions", "type": "paraphrase"}
+{"question": "How did the benchmark know the server was ready?", "answer_contains": ["vLLM has a health endpoint", "poll vLLM's health endpoint"], "type": "paraphrase"}
+{"question": "What should I lead with when presenting this project?", "answer_contains": "lead with the numbers you measured, not the tools you used", "type": "paraphrase"}
+{"question": "Why did the metrics dashboard stop showing data under heavy load?", "answer_contains": "every Prometheus scrape timed out", "type": "paraphrase"}
+{"question": "What's an H100's memory bandwidth?", "answer_contains": "An H100, over three thousand", "type": "exact"}
+{"question": "What does vllm:inter_token_latency_seconds show?", "answer_contains": "metric gives the server-side view in Grafana", "type": "exact"}
+{"question": "Which Modal region did the client call?", "answer_contains": "Modal's us-east region", "type": "exact"}
+{"question": "What did the 2017 paper introduce?", "answer_contains": "the 2017 research paper that introduced the transformer", "type": "exact"}
+{"question": "What's in results/20261030-160443.json?", "answer_contains": "A rerun with Prometheus recording", "type": "exact"}
+{"question": "How many layers does Qwen 2.5 7B have?", "answer_contains": "twenty-eight layers", "type": "exact"}
+{"question": "How much slower did each user get going from 1 to 32 users?", "answer_contains": "14% slower", "type": "needle"}
+{"question": "How many concurrent users can one A10 handle with a 5-second p99 TTFT target?", "answer_contains": "tops out at about 64 concurrent users per A10", "type": "needle"}
+{"question": "How close to the hardware limit was single-user decode on the A10?", "answer_contains": "roughly 75% of the hardware limit", "type": "needle"}
+{"question": "How full was the KV cache at 64 users?", "answer_contains": "the KV cache only 15% full", "type": "needle"}
+{"question": "What does the A10 cost per million output tokens at 32 users?", "answer_contains": "$0.43 per million output tokens", "type": "needle"}
+{"question": "How much KV cache does a 4,000-token conversation need?", "answer_contains": "about two hundred and thirty megabytes", "type": "needle"}
+{"question": "How much KV cache memory did older systems waste compared with PagedAttention?", "answer_contains": ["under four percent", "sixty to eighty percent"], "type": "needle"}
+{"question": "How long does Modal wait before answering with a redirect?", "answer_contains": "about two and a half minutes", "type": "needle"}
