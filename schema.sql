@@ -16,3 +16,10 @@ create index chunks_embedding_hnsw on chunks
 
 -- Inverted index for keyword search: word -> list of chunks containing it.
 create index chunks_tsv_gin on chunks using gin (tsv);
+
+-- How many chunks contain each word, refreshed by ingest.py. BM25 needs this
+-- to weight rare words ("Orca", 1 chunk) above common ones ("use", most chunks).
+create table term_stats (
+  term text primary key,
+  ndoc int  not null
+);

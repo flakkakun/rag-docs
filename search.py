@@ -27,20 +27,42 @@ def vector_search(conn, question, k=CANDIDATES, ef_search=100):
     ).fetchall()
 
 
-def keyword_search(conn, question, k=CANDIDATES):
+def keyword_search(conn, question, k=CANDIDATES, k1=1.2, b=0.75):
+    """BM25, computed in SQL. Postgres's own ts_rank has no IDF, so a common
+    word like "use" counts as much as a rare one like "Orca".
+
+    For each query word found in a chunk:
+        idf  = ln(1 + (N - df + 0.5) / (df + 0.5))       rare words score higher
+        tf'  = tf * (k1 + 1) / (tf + k1 * (1 - b + b * len / avg_len))
+    and the chunk's score is the sum of idf * tf'. k1 caps how much repeating a
+    word helps; b stops long chunks winning just by containing more words.
+    """
     # plainto_tsquery ANDs every word, so a full question rarely matches any
-    # chunk. Swapping & for | means "any of these words", and ts_rank_cd then
-    # scores chunks higher when they contain more of them, closer together.
-    # This is BM25-like, not true BM25 (Postgres doesn't ship BM25).
+    # chunk. Swapping & for | means "any of these words"; the GIN index uses it
+    # to find candidate chunks before scoring.
     return conn.execute(
         """
-        with q as (select replace(plainto_tsquery('english', %s)::text, '&', '|')::tsquery as q)
-        select id, source, content from chunks, q
-        where tsv @@ q.q
-        order by ts_rank_cd(tsv, q.q) desc
-        limit %s
+        with q as (
+          select distinct lexeme as term from unnest(to_tsvector('english', %(q)s))
+        ), n as (
+          select count(*)::float as n, avg(length(tsv))::float as avg_len from chunks
+        )
+        select c.id, c.source, c.content
+        from chunks c
+        cross join n
+        cross join lateral unnest(c.tsv) t
+        join q on q.term = t.lexeme
+        join term_stats s on s.term = t.lexeme
+        where c.tsv @@ replace(plainto_tsquery('english', %(q)s)::text, '&', '|')::tsquery
+        group by c.id, c.source, c.content
+        order by sum(
+          ln(1 + (n.n - s.ndoc + 0.5) / (s.ndoc + 0.5))
+          * cardinality(t.positions) * (%(k1)s + 1)
+          / (cardinality(t.positions) + %(k1)s * (1 - %(b)s + %(b)s * length(c.tsv) / n.avg_len))
+        ) desc
+        limit %(k)s
         """,
-        (question, k),
+        {"q": question, "k": k, "k1": k1, "b": b},
     ).fetchall()
 
 

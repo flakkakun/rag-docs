@@ -55,6 +55,10 @@ def main():
                 "insert into chunks (source, position, content, embedding) values (%s, %s, %s, %s)",
                 [(s, i, c, v) for (s, i, c), v in zip(rows, vectors)],
             )
+        # Document frequencies for BM25. Computed once here, like a search
+        # engine does at index time, rather than on every query.
+        conn.execute("truncate term_stats")
+        conn.execute("insert into term_stats select word, ndoc from ts_stat('select tsv from chunks')")
     print(f"Stored {len(rows)} chunks from {len({r[0] for r in rows})} files.")
 
 
