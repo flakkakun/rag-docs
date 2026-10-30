@@ -8,6 +8,9 @@ eval/questions.jsonl holds one test case per line:
 
 A hit means one of the top k chunks contains that phrase. Labelling by phrase
 instead of chunk id means the test set survives re-chunking with a new size.
+When the docs answer a question in more than one place, give a list:
+    {"question": "...", "answer_contains": ["phrase from place A", "phrase from place B"]}
+Otherwise a correct answer from place B gets scored as a miss.
 """
 import argparse
 import json
@@ -42,8 +45,10 @@ def main():
             start = time.perf_counter()
             for case in cases:
                 results = search(conn, case["question"], mode, args.k)
-                target = norm(case["answer_contains"])
-                rank = next((i for i, r in enumerate(results, 1) if target in norm(r[2])), None)
+                targets = case["answer_contains"]
+                targets = [norm(t) for t in ([targets] if isinstance(targets, str) else targets)]
+                rank = next((i for i, r in enumerate(results, 1)
+                             if any(t in norm(r[2]) for t in targets)), None)
                 if rank:
                     hits += 1
                     rr += 1 / rank   # MRR: 1.0 if the right chunk is first, 0.5 if second...
