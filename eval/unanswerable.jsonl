@@ -1,0 +1,10 @@
+{"question": "How does LoRA fine-tuning work?", "type": "off-topic"}
+{"question": "What learning rate was Qwen 2.5 trained with?", "type": "off-topic"}
+{"question": "How does TensorRT-LLM compare to vLLM?", "type": "off-topic"}
+{"question": "How do you split a model across several GPUs with tensor parallelism?", "type": "off-topic"}
+{"question": "What is GPT-4's context window?", "type": "off-topic"}
+{"question": "What was the measured TTFT on the L4?", "type": "trap"}
+{"question": "What throughput did the server reach with 256 concurrent users?", "type": "trap"}
+{"question": "How much faster was SGLang than vLLM in the benchmark?", "type": "trap"}
+{"question": "How much faster did the AWQ quantized model run on the A10?", "type": "trap"}
+{"question": "What was the p99 TTFT on the H100 run?", "type": "trap"}
