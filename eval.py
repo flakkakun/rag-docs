@@ -2,6 +2,7 @@
 
     python eval.py               # compares all four search modes
     python eval.py -k 3
+    python eval.py --modes rerank rewrite   # rewrite needs the LLM server running
 
 eval/questions.jsonl holds one test case per line:
     {"question": "...", "answer_contains": "a short phrase from the right passage", "type": "exact"}
@@ -41,6 +42,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--questions", default="eval/questions.jsonl")
     ap.add_argument("-k", type=int, default=5)
+    ap.add_argument("--modes", nargs="+", default=MODES)
     ap.add_argument("--misses", action="store_true", help="list the questions each mode missed")
     args = ap.parse_args()
 
@@ -54,7 +56,7 @@ def main():
     print(header + f"  {'MRR':>5}  {'ms/query':>8}")
     with connect() as conn:
         search(conn, "warm up", "rerank")   # load both models before timing
-        for mode in MODES:
+        for mode in args.modes:
             hits, rr, misses = defaultdict(int), 0.0, []
             start = time.perf_counter()
             for case in cases:

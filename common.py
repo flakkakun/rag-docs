@@ -12,6 +12,9 @@ RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "http://localhost:11434/v1")
 LLM_MODEL = os.environ.get("LLM_MODEL", "qwen2.5:7b-instruct")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "ollama")   # Ollama ignores it, vLLM checks it
+# Rewriting a query is an easier job than writing an answer, so it can use a
+# smaller, faster model on the same server.
+REWRITE_MODEL = os.environ.get("REWRITE_MODEL", LLM_MODEL)
 
 # bge was trained with this prefix on queries (not on documents). Leaving it off
 # still works, but recall drops a little.

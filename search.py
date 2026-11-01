@@ -8,10 +8,12 @@ Modes, each one building on the last:
     keyword  Postgres full-text search (exact words)
     hybrid   both lists merged with reciprocal rank fusion
     rerank   hybrid, then a cross-encoder re-sorts the top candidates (default)
+    rewrite  an LLM rewrites the question too; both are searched, then rerank
 """
 import argparse
+from functools import cache
 
-from common import connect, embed_query, reranker
+from common import REWRITE_MODEL, connect, embed_query, llm, reranker
 
 CANDIDATES = 50   # how many each first-stage search returns
 RERANK_TOP = 30   # how many the cross-encoder reads (it's the slow step)
@@ -92,11 +94,34 @@ def rerank(question, rows, top=RERANK_TOP):
     return [r for _, r in sorted(zip(scores, rows), key=lambda p: p[0], reverse=True)]
 
 
+REWRITE_PROMPT = """Rewrite the user's question as a search query for a collection of technical documents.
+- Keep every exact name, number, code identifier and metric name unchanged.
+- Add common synonyms or the more technical term for the key words.
+- Reply with the query only, on one line."""
+
+
+@cache   # same question, same rewrite (temperature 0), so don't pay for it twice
+def rewrite_query(question):
+    return llm().chat.completions.create(
+        model=REWRITE_MODEL,
+        temperature=0,
+        messages=[{"role": "system", "content": REWRITE_PROMPT},
+                  {"role": "user", "content": question}],
+    ).choices[0].message.content.strip().strip('"')
+
+
 def search(conn, question, mode="rerank", k=5):
     if mode == "vector":
         results = vector_search(conn, question)
     elif mode == "keyword":
         results = keyword_search(conn, question)
+    elif mode == "rewrite":
+        # Search with the original AND the rewrite: a rewrite can lose an exact
+        # term the original had, so it adds candidates rather than replacing them.
+        # The reranker still scores against the original, which is what was asked.
+        rewritten = rewrite_query(question)
+        results = rerank(question, rrf(vector_search(conn, question), keyword_search(conn, question),
+                                       vector_search(conn, rewritten), keyword_search(conn, rewritten)))
     else:
         results = rrf(vector_search(conn, question), keyword_search(conn, question))
         if mode == "rerank":
@@ -107,10 +132,12 @@ def search(conn, question, mode="rerank", k=5):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("question")
-    ap.add_argument("--mode", default="rerank", choices=["vector", "keyword", "hybrid", "rerank"])
+    ap.add_argument("--mode", default="rerank", choices=["vector", "keyword", "hybrid", "rerank", "rewrite"])
     ap.add_argument("-k", type=int, default=5)
     args = ap.parse_args()
 
+    if args.mode == "rewrite":
+        print(f"rewritten: {rewrite_query(args.question)}\n")
     with connect() as conn:
         for i, (_, source, content) in enumerate(search(conn, args.question, args.mode, args.k), 1):
             preview = " ".join(content.split())[:200]
